@@ -21,112 +21,108 @@
 #ifndef __LIBUSBPP_DEVICE_IMPL_HPP
 #define __LIBUSBPP_DEVICE_IMPL_HPP
 
-#include <memory>
-#include <string>
-#include <map>
-
-#include <libusb.h>
-
-#include <libusbpp/Device.hpp>
 #include "LibusbImpl.hpp"
 
+#include <libusb.h>
+#include <libusbpp/Device.hpp>
+
+#include <map>
+#include <memory>
+#include <string>
 
 namespace LibUSB
 {
 
-	class DeviceDeleter
-	{
-	public:
-		void operator()(libusb_device* dev) { libusb_unref_device(dev); };
+class DeviceDeleter
+{
+public:
+    void operator()(libusb_device* dev)
+    {
+        libusb_unref_device(dev);
+    };
+};
 
-	};
+class DeviceHandleDeleter
+{
+public:
+    void operator()(libusb_device_handle* devhandle)
+    {
+        libusb_close(devhandle);
+    };
+};
 
-	class DeviceHandleDeleter
-	{
-	public:
-		void operator()(libusb_device_handle* devhandle) { libusb_close(devhandle); };
+class DeviceImpl : public std::enable_shared_from_this<DeviceImpl>
+{
 
-	};
+public:
+    DeviceImpl(libusb_device* pDevice);
+    ~DeviceImpl();
 
-	class DeviceImpl : public std::enable_shared_from_this<DeviceImpl>
-	{
+    /// Obtains the device descriptor.
+    std::shared_ptr<libusb_device_descriptor> getDeviceDescriptor();
 
-	public:
+    /// Returns TRUE if the device is open
+    bool isOpen() const;
 
-		DeviceImpl(libusb_device* pDevice);
-		~DeviceImpl();
+    /// Opens a handle to the usb device.
+    void Open();
 
-		/// Obtains the device descriptor.
-		std::shared_ptr<libusb_device_descriptor> getDeviceDescriptor();
+    /// Obtains the language id
+    uint16_t getLangId();
 
-		/// Returns TRUE if the device is open
-		bool isOpen()const;
+    /// Obtains the given ascii descriptor string
+    std::string getStringDescriptor(uint8_t index);
 
-		/// Opens a handle to the usb device.
-		void Open();
+    /// Obtains a unicode descriptor string
+    std::wstring getStringDescriptorW(uint8_t index);
 
-		/// Obtains the language id
-		uint16_t getLangId();
+    /// Returns the index of the active configuration.
+    bool getActiveConfiguration(uint8_t& index) const;
 
-		/// Obtains the given ascii descriptor string
-		std::string getStringDescriptor(uint8_t index);
+    /// Sets the active configuration
+    void setActiveConfiguration(uint8_t index);
 
-		/// Obtains a unicode descriptor string
-		std::wstring getStringDescriptorW(uint8_t index);
+    /// Returns the requested the configuration descriptor.
+    std::shared_ptr<Configuration> getConfiguration(uint8_t ConfigValue);
 
-		/// Returns the index of the active configuration.
-		bool getActiveConfiguration( uint8_t &index )const;
+    /// Device object
+    std::shared_ptr<libusb_device> m_pDevice;
 
-		/// Sets the active configuration
-		void setActiveConfiguration( uint8_t index );
+    /// Device handle
+    std::shared_ptr<libusb_device_handle> m_pHandle;
 
-		/// Returns the requested the configuration descriptor.
-		std::shared_ptr<Configuration> getConfiguration(uint8_t ConfigValue);
+    /// Returns the LibUSB++ device object/owner
+    std::weak_ptr<Device> getDevice() const;
 
-		/// Device object
-		std::shared_ptr<libusb_device> m_pDevice;
+    /// Allows device to set the parent device after initial construction.
+    void setParentDevice(std::weak_ptr<Device> pParentDevice);
 
-		/// Device handle
-		std::shared_ptr<libusb_device_handle> m_pHandle;
+    /// Returns endpoint 0
+    std::shared_ptr<Endpoint> getControlEndpoint();
 
+    std::weak_ptr<LibUSBImpl> getLibUSBImpl() const;
 
-		/// Returns the LibUSB++ device object/owner
-		std::weak_ptr<Device> getDevice()const;
+private:
+    /// Weak_ptr collection of other configuration objects.
+    std::map<uint8_t, std::weak_ptr<Configuration>> m_ConfigurationMap;
 
-		/// Allows device to set the parent device after initial construction.
-		void setParentDevice(std::weak_ptr<Device> pParentDevice);
+    /// Device Descriptor
+    std::shared_ptr<libusb_device_descriptor> m_pDeviceDescriptor;
 
-		/// Returns endpoint 0
-		std::shared_ptr<Endpoint> getControlEndpoint();
+    /// Libusb++ device/parent
+    std::weak_ptr<Device> m_ParentDevice;
 
-                std::weak_ptr<LibUSBImpl> getLibUSBImpl() const;
+    /// Language ID
+    uint16_t languageId;
 
-	private:
+    /// Dummy descriptor for Endpoint zero.
+    libusb_endpoint_descriptor m_EndpointZeroDescriptor;
 
+    std::shared_ptr<Endpoint> m_pEndpointZero;
 
-		/// Weak_ptr collection of other configuration objects.
-		std::map<uint8_t, std::weak_ptr<Configuration>> m_ConfigurationMap;
+    std::weak_ptr<LibUSBImpl> m_libusbImpl;
+};
 
-		/// Device Descriptor
-		std::shared_ptr<libusb_device_descriptor> m_pDeviceDescriptor;
-
-		/// Libusb++ device/parent
-		std::weak_ptr<Device> m_ParentDevice;
-
-		/// Language ID
-		uint16_t languageId;
-
-		/// Dummy descriptor for Endpoint zero.
-		libusb_endpoint_descriptor m_EndpointZeroDescriptor;
-
-		std::shared_ptr<Endpoint> m_pEndpointZero;
-
-                std::weak_ptr<LibUSBImpl> m_libusbImpl;
-
-	};
-
-
-
-}
+} // namespace LibUSB
 
 #endif // __LIBUSBPP_DEVICE_IMPL_HPP

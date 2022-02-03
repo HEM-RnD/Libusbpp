@@ -21,79 +21,73 @@
 #ifndef LIBUSBPP_HPP
 #define LIBUSBPP_HPP
 
-#include <memory>
-#include <list>
-
 #include <libusbpp/Device.hpp>
-#include <libusbpp/Transfer.hpp>
 #include <libusbpp/EndpointDefs.hpp>
+#include <libusbpp/Transfer.hpp>
 
+#include <list>
+#include <memory>
 
 namespace LibUSB
 {
 
-	/// LibUSBImpl forward declaration
-	class LibUSBImpl;
+/// LibUSBImpl forward declaration
+class LibUSBImpl;
 
-	/// Contains static methods for enumerating devices
-	class LibUSB
-	{
+/// Contains static methods for enumerating devices
+class LibUSB
+{
 
-	public:
-                explicit LibUSB(bool debug = false);
+public:
+    explicit LibUSB(bool debug = false);
 
-                LibUSB(const LibUSB&) = delete;
-                LibUSB(LibUSB&&) = delete;
-                LibUSB operator=(const LibUSB&) = delete;
+    LibUSB(const LibUSB&) = delete;
+    LibUSB(LibUSB&&) = delete;
+    LibUSB operator=(const LibUSB&) = delete;
 
-		/// Function pointer to a LibUSB device object factory.
-		using DeviceFactory_t = std::function<std::shared_ptr<Device>(std::shared_ptr<DeviceImpl>)>;
+    /// Function pointer to a LibUSB device object factory.
+    using DeviceFactory_t = std::function<std::shared_ptr<Device>(std::shared_ptr<DeviceImpl>)>;
 
+    /*!
+     * \brief
+     *
+     * Returns a list of devices (that can be opened) that match the given vendor/product id.
+     *
+     * \param vendorID (uint16_t): USB-IF vendor id of the desired device.
+     * \param deviceID (uint16_t): USB-IF product id of the desired device.
+     * \param debugLibUSB (bool): Enable LibUSB debug output on standard error.
+     * \returns (std::list<std::shared_ptr<D>>): List of shared pointers to LibUSB::Device class objects.
+     * \sa
+     * \note
+     * \warning Multiple devices can be returned via this method, if attached.
+     */
+    std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, DeviceFactory_t factory = nullptr);
 
-		/*!
-		 * \brief
-		 *
-		 * Returns a list of devices (that can be opened) that match the given vendor/product id.
-		 *
-		 * \param vendorID (uint16_t): USB-IF vendor id of the desired device.
-		 * \param deviceID (uint16_t): USB-IF product id of the desired device.
-		 * \param debugLibUSB (bool): Enable LibUSB debug output on standard error.
-		 * \returns (std::list<std::shared_ptr<D>>): List of shared pointers to LibUSB::Device class objects.
-		 * \sa
-		 * \note
-		 * \warning Multiple devices can be returned via this method, if attached.
-		 */
-		std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, DeviceFactory_t factory = nullptr);
+    /*!
+     * \brief
+     *
+     * Returns a list of devices (that can be opened) that match the given vendor/product id.
+     *
+     * \param vendorID (uint16_t): USB-IF vendor id of the desired device.
+     * \param deviceID (uint16_t): USB-IF product id of the desired device.
+     * \param serialStr (std::wstring): Device unique serial number
+     * \param debugLibUSB (bool): Enable LibUSB debug output on standard error.
+     * \returns (std::list<std::shared_ptr<D>>): List of shared pointers to LibUSB::Device class objects.
+     * \sa
+     * \note
+     * \warning Multiple devices can be returned via this method, if attached.
+     */
+    std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, std::wstring serialStr, DeviceFactory_t factory = nullptr);
 
-		/*!
-		 * \brief
-		 *
-		 * Returns a list of devices (that can be opened) that match the given vendor/product id.
-		 *
-		 * \param vendorID (uint16_t): USB-IF vendor id of the desired device.
-		 * \param deviceID (uint16_t): USB-IF product id of the desired device.
-		 * \param serialStr (std::wstring): Device unique serial number
-		 * \param debugLibUSB (bool): Enable LibUSB debug output on standard error.
-		 * \returns (std::list<std::shared_ptr<D>>): List of shared pointers to LibUSB::Device class objects.
-		 * \sa
-		 * \note
-		 * \warning Multiple devices can be returned via this method, if attached.
-		 */
-		std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, std::wstring serialStr, DeviceFactory_t factory = nullptr);
+    /// Returns all devices attached to the system.
+    std::list<std::shared_ptr<Device>> FindAllDevices(DeviceFactory_t factory = nullptr);
 
-		/// Returns all devices attached to the system.
-		std::list<std::shared_ptr<Device>> FindAllDevices(DeviceFactory_t factory = nullptr);
+private:
+    friend class TransferImpl;
 
-              private:
-		friend class TransferImpl;
+    std::shared_ptr<LibUSBImpl> Impl_;
+};
 
-		std::shared_ptr<LibUSBImpl> Impl_;
-
-
-
-	};
-
-
-}
+} // namespace LibUSB
 
 #endif // LIBUSBPP_HPP

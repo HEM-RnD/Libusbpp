@@ -21,76 +21,70 @@
 #ifndef LIBUSBPP_CONFIGURATION_HPP
 #define LIBUSBPP_CONFIGURATION_HPP
 
-#include <memory>
-#include <string>
+#include <libusbpp/Interface.hpp>
 #include <stdint.h>
 
-#include <libusbpp/Interface.hpp>
-
+#include <memory>
+#include <string>
 
 namespace LibUSB
 {
 
+/// Configuration Implementation
+class ConfigurationImpl;
 
+class Configuration
+{
+public:
+    Configuration(std::shared_ptr<ConfigurationImpl> pInit);
+    ~Configuration();
 
-	/// Configuration Implementation
-	class ConfigurationImpl;
+    // Configuration Descriptor Details.
 
-	class Configuration
-	{
-	public:
-		Configuration(std::shared_ptr<ConfigurationImpl> pInit);
-		~Configuration();
+    /// Returns the string descriptor describing this configuration
+    std::wstring DescriptorString() const;
 
-	// Configuration Descriptor Details.
+    /// Returns the identifier value of this configuration
+    uint8_t Value() const;
 
-		/// Returns the string descriptor describing this configuration
-		std::wstring DescriptorString()const;
+    /// Returns the maximum amount of power this device will consume while fully operational. (mA)
+    int MaxPower() const;
 
-		/// Returns the identifier value of this configuration
-		uint8_t Value()const;
+    /// Sets this configuration as the active configuration.
+    void SetAsActive();
 
-		/// Returns the maximum amount of power this device will consume while fully operational. (mA)
-		int MaxPower()const;
+    /// Returns TRUE if the device is self powered.
+    bool isSelfPowered() const;
 
-		/// Sets this configuration as the active configuration.
-		void SetAsActive();
+    /// Returns TRUE if the device supports remote wakeup.
+    bool supportsRemoteWakeup() const;
 
-		/// Returns TRUE if the device is self powered.
-		bool isSelfPowered()const;
+    /// Returns TRUE if there are extra descriptors present
+    bool hasExtraDescriptors() const;
 
-		/// Returns TRUE if the device supports remote wakeup.
-		bool supportsRemoteWakeup()const;
+    /// Returns a pointer the the extra descriptors
+    const unsigned char* getExtraDescriptors() const;
 
-		/// Returns TRUE if there are extra descriptors present
-		bool hasExtraDescriptors()const;
+    /// Returns the size of the extra descriptors, in bytes.
+    int getExtraDescriptorSize() const;
 
-		/// Returns a pointer the the extra descriptors
-		const unsigned char * getExtraDescriptors()const;
+    // Interfaces
 
-		/// Returns the size of the extra descriptors, in bytes.
-		int getExtraDescriptorSize()const;
+    /// Returns the number of interfaces supported by this configuration.
+    int NumInterfaces() const;
 
-	// Interfaces
+    /// Returns the specified interface by index.
+    std::shared_ptr<Interface> getInterfaceByIndex(int index) const;
 
-		/// Returns the number of interfaces supported by this configuration.
-		int NumInterfaces()const;
+    /// Returns the specified interface by Interface number.
+    std::shared_ptr<Interface> getInterface(int InterfaceNumber) const;
 
-		/// Returns the specified interface by index.
-		std::shared_ptr<Interface> getInterfaceByIndex(int index)const;
+protected:
+private:
+    /// Configuration Implementation
+    std::shared_ptr<ConfigurationImpl> m_pConfigImpl_;
+};
 
-		/// Returns the specified interface by Interface number.
-		std::shared_ptr<Interface> getInterface(int InterfaceNumber)const;
-
-	protected:
-
-
-	private:
-
-		/// Configuration Implementation
-		std::shared_ptr<ConfigurationImpl> m_pConfigImpl_;
-	};
-
-}
+} // namespace LibUSB
 
 #endif // LIBUSBPP_CONFIGURATION_HPP

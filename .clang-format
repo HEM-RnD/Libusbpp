@@ -1,0 +1,57 @@
+---
+ColumnLimit: 0
+BasedOnStyle: WebKit
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyNamespace: false
+  SplitEmptyRecord: false
+BreakBeforeBraces: Custom
+BreakConstructorInitializers: BeforeComma
+AlignAfterOpenBracket: Align
+IndentCaseLabels: true
+IndentPPDirectives: None
+BreakBeforeInheritanceComma: true
+SpaceAfterTemplateKeyword: false
+FixNamespaceComments: true
+BreakBeforeBinaryOperators: All
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+BinPackArguments: false
+BinPackParameters: false
+AlignConsecutiveMacros: true
+MaxEmptyLinesToKeep: 1
+IncludeBlocks: Regroup
+SortIncludes: CaseSensitive
+IncludeCategories:
+  - Regex: '\"HEM\/.+\"' # local HEM library headers
+    Priority: 2
+    SortPriority: 0
+  - Regex: '<HEM\/.+>' # HEM library headers
+    Priority: 3
+    SortPriority: 0
+  - Regex: '<[[:alnum:]_]+>' # Standard Library headers
+    Priority: 5
+    SortPriority: 0
+  - Regex: '^<.*>' # others libraries headers
+    Priority: 4
+    SortPriority: 0
+  - Regex: '.*' # local headers
+    Priority: 1
+    SortPriority: 0

@@ -21,108 +21,98 @@
 #ifndef LIBUSBPP_DEVICE_HPP
 #define LIBUSBPP_DEVICE_HPP
 
-#include <stdint.h>
-#include <string>
-#include <memory>
-
 #include <libusbpp/Configuration.hpp>
 #include <libusbpp/Endpoint.hpp>
+#include <stdint.h>
 
+#include <memory>
+#include <string>
 
 namespace LibUSB
 {
 
-	/// Libusb Device Implementation Forward Declaration
-	class DeviceImpl;
+/// Libusb Device Implementation Forward Declaration
+class DeviceImpl;
 
-	/// Libusb device interface
-	class Device : public std::enable_shared_from_this<Device>
-	{
-	public:
+/// Libusb device interface
+class Device : public std::enable_shared_from_this<Device>
+{
+public:
+    Device(std::shared_ptr<DeviceImpl> pInit);
 
-		Device(std::shared_ptr<DeviceImpl> pInit);
+    virtual ~Device();
 
-		virtual ~Device();
+    void Init();
 
-		void Init();
+    // Device State
 
-	// Device State
+    /// Returns TRUE if the device is open.
+    bool isOpen();
 
-		/// Returns TRUE if the device is open.
-		bool isOpen();
+    /// Opens the device.
+    void Open();
 
-		/// Opens the device.
-		void Open();
+    // Device Descriptor
 
-	// Device Descriptor
+    /// USB specification release number
+    uint16_t USBSpecification();
 
-		/// USB specification release number
-		uint16_t USBSpecification();
+    /// USB-IF class code
+    uint8_t DeviceClass();
 
-		/// USB-IF class code
-		uint8_t DeviceClass();
+    /// USB-IF subclass code for the device, qualified by the bDeviceClass value.
+    uint8_t DeviceSubclass();
 
-		/// USB-IF subclass code for the device, qualified by the bDeviceClass value.
-		uint8_t DeviceSubclass();
+    /// USB-IF protocol code for the device, qualified by the bDeviceClass and bDeviceSubClass values.
+    uint8_t DeviceProtocol();
 
-		/// USB-IF protocol code for the device, qualified by the bDeviceClass and bDeviceSubClass values.
-		uint8_t DeviceProtocol();
+    /// USB-IF vendor ID
+    uint16_t vendorID();
 
-		/// USB-IF vendor ID
-		uint16_t vendorID();
+    /// USB-IF product ID
+    uint16_t productID();
 
-		/// USB-IF product ID
-		uint16_t productID();
+    /// Returns a string describing the product.
+    std::wstring ProductString();
 
-		/// Returns a string describing the product.
-		std::wstring ProductString();
+    /// Returns a string describing the manufacturer.
+    std::wstring ManufacturerString();
 
-		/// Returns a string describing the manufacturer.
-		std::wstring ManufacturerString();
+    /// Returns the serial number string of the device.
+    std::wstring SerialString();
 
-		/// Returns the serial number string of the device.
-		std::wstring SerialString();
+    /// Returns the number of possible configurations for this device.
+    uint8_t NumConfigurations();
 
-		/// Returns the number of possible configurations for this device.
-		uint8_t NumConfigurations();
+    // Configurations
 
-	// Configurations
+    /// Returns the requested configuration
+    std::shared_ptr<Configuration> getConfiguration(uint8_t ConfigValue);
 
-		/// Returns the requested configuration
-		std::shared_ptr<Configuration> getConfiguration(uint8_t ConfigValue);
+    /// Returns the activeConfiguration
+    std::shared_ptr<Configuration> getActiveConfiguration();
 
-		/// Returns the activeConfiguration
-		std::shared_ptr<Configuration> getActiveConfiguration();
+    // Control endpoint
 
-	// Control endpoint
+    /// Returns the control endpoint (Endpoint 0)
+    std::shared_ptr<Endpoint> getControlEndpoint();
 
-		/// Returns the control endpoint (Endpoint 0)
-		std::shared_ptr<Endpoint> getControlEndpoint();
+protected:
+    /// Transfers need access to the transfer event notification method of their target device.
+    friend class TransferImpl;
 
+    /// Notification of a completed transfer
+    /// \warning This function can be called from other threads when using asynchronous transfers!
+    virtual void TransferEventNotification(std::shared_ptr<Transfer> pCompletedTransfer);
 
+private:
+    /// Cached Active Configuration
+    std::shared_ptr<Configuration> m_pActiveConfiguration;
 
-	protected:
+    /// Device Implementation Object
+    std::shared_ptr<DeviceImpl> m_pDeviceImpl_;
+};
 
-		/// Transfers need access to the transfer event notification method of their target device.
-		friend class TransferImpl;
-
-		/// Notification of a completed transfer
-		/// \warning This function can be called from other threads when using asynchronous transfers!
-		virtual void TransferEventNotification(std::shared_ptr<Transfer> pCompletedTransfer);
-
-
-	private:
-
-		/// Cached Active Configuration
-		std::shared_ptr<Configuration> m_pActiveConfiguration;
-
-		/// Device Implementation Object
-		std::shared_ptr<DeviceImpl> m_pDeviceImpl_;
-
-
-
-	};
-
-}
+} // namespace LibUSB
 
 #endif // LIBUSBPP_DEVICE_HPP

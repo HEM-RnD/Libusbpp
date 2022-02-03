@@ -24,19 +24,28 @@
 namespace LibUSB
 {
 
-	/// Direction Type
-	typedef enum { DIR_OUT, DIR_IN } Direction_t;
+/// Direction Type
+typedef enum { DIR_OUT,
+               DIR_IN } Direction_t;
 
-	/// Transfer Types
-	typedef enum { CONTROL, ISOCHRONOUS, BULK, INTERRUPT } Transfer_t;
+/// Transfer Types
+typedef enum { CONTROL,
+               ISOCHRONOUS,
+               BULK,
+               INTERRUPT } Transfer_t;
 
-	/// Synchronization Types
-	typedef enum { NONE, ASYNCRONOUS , ADAPTIVE, SYNCHRONOUS } Synchronization_t;
+/// Synchronization Types
+typedef enum { NONE,
+               ASYNCRONOUS,
+               ADAPTIVE,
+               SYNCHRONOUS } Synchronization_t;
 
-	/// Usage Type
-	typedef enum { DATA, FEEDBACK, EXPLICITFEEDBACKDATA, RESERVED } Usage_t;
+/// Usage Type
+typedef enum { DATA,
+               FEEDBACK,
+               EXPLICITFEEDBACKDATA,
+               RESERVED } Usage_t;
 
-
-}
+} // namespace LibUSB
 
 #endif // LIBUSBPP_ENDPOINT_DEFS_HPP

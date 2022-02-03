@@ -18,84 +18,80 @@
  * along with libusbpp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libusbpp/Configuration.hpp>
-
 #include "ConfigurationImpl.hpp"
 
+#include <libusbpp/Configuration.hpp>
 
-LibUSB::Configuration::Configuration( std::shared_ptr<ConfigurationImpl> pInit )
+LibUSB::Configuration::Configuration(std::shared_ptr<ConfigurationImpl> pInit)
 {
-	// Save the implementation object
-	m_pConfigImpl_ = pInit;
-
+    // Save the implementation object
+    m_pConfigImpl_ = pInit;
 }
 
 LibUSB::Configuration::~Configuration()
 {
-	// Destroy Implementation
-	m_pConfigImpl_.reset();
+    // Destroy Implementation
+    m_pConfigImpl_.reset();
 }
 
-std::wstring LibUSB::Configuration::DescriptorString()const
+std::wstring LibUSB::Configuration::DescriptorString() const
 {
 
-	// Obtain the config descriptor string
-	return m_pConfigImpl_->DescriptorString();
-
+    // Obtain the config descriptor string
+    return m_pConfigImpl_->DescriptorString();
 }
 
 uint8_t LibUSB::Configuration::Value() const
 {
-	return m_pConfigImpl_->getValue();
+    return m_pConfigImpl_->getValue();
 }
 
 int LibUSB::Configuration::MaxPower() const
 {
-	return (int)m_pConfigImpl_->getMaxPower() * 2;
+    return (int)m_pConfigImpl_->getMaxPower() * 2;
 }
 
-const unsigned char * LibUSB::Configuration::getExtraDescriptors() const
+const unsigned char* LibUSB::Configuration::getExtraDescriptors() const
 {
-	return m_pConfigImpl_->getExtraDescriptors();
+    return m_pConfigImpl_->getExtraDescriptors();
 }
 
 int LibUSB::Configuration::getExtraDescriptorSize() const
 {
-	return m_pConfigImpl_->getExtraDescriptorSize();
+    return m_pConfigImpl_->getExtraDescriptorSize();
 }
 
 void LibUSB::Configuration::SetAsActive()
 {
-	m_pConfigImpl_->SetAsActive();
+    m_pConfigImpl_->SetAsActive();
 }
 
 bool LibUSB::Configuration::hasExtraDescriptors() const
 {
-	return m_pConfigImpl_->hasExtraDescriptors();
+    return m_pConfigImpl_->hasExtraDescriptors();
 }
 
 bool LibUSB::Configuration::supportsRemoteWakeup() const
 {
-	return m_pConfigImpl_->supportsRemoteWakeup();
+    return m_pConfigImpl_->supportsRemoteWakeup();
 }
 
 bool LibUSB::Configuration::isSelfPowered() const
 {
-	return m_pConfigImpl_->isSelfPowered();
+    return m_pConfigImpl_->isSelfPowered();
 }
 
 int LibUSB::Configuration::NumInterfaces() const
 {
-	return m_pConfigImpl_->NumInterfaces();
+    return m_pConfigImpl_->NumInterfaces();
 }
 
-std::shared_ptr<LibUSB::Interface> LibUSB::Configuration::getInterfaceByIndex( int index ) const
+std::shared_ptr<LibUSB::Interface> LibUSB::Configuration::getInterfaceByIndex(int index) const
 {
-	return m_pConfigImpl_->getInterfaceByIndex(index);
+    return m_pConfigImpl_->getInterfaceByIndex(index);
 }
 
-std::shared_ptr<LibUSB::Interface> LibUSB::Configuration::getInterface( int InterfaceNumber ) const
+std::shared_ptr<LibUSB::Interface> LibUSB::Configuration::getInterface(int InterfaceNumber) const
 {
-	return m_pConfigImpl_->getInterface(InterfaceNumber);
+    return m_pConfigImpl_->getInterface(InterfaceNumber);
 }
-

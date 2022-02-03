@@ -21,238 +21,216 @@
 #ifndef __LIBUSBPP_TRANSFER_IMPL_HPP
 #define __LIBUSBPP_TRANSFER_IMPL_HPP
 
-#include <memory>
-#include <chrono>
-#include <map>
-#include <atomic>
-
-#include <libusb.h>
-
-#include <libusbpp/TransferDefs.hpp>
-#include <libusbpp/Transfer.hpp>
-
 #include "EndpointImpl.hpp"
 
+#include <libusb.h>
+#include <libusbpp/Transfer.hpp>
+#include <libusbpp/TransferDefs.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <map>
+#include <memory>
 
 namespace LibUSB
 {
 
-	class TransferDeleter
-	{
-	public:
-		void operator()(libusb_transfer* pTransfer) { libusb_free_transfer(pTransfer); };
+class TransferDeleter
+{
+public:
+    void operator()(libusb_transfer* pTransfer)
+    {
+        libusb_free_transfer(pTransfer);
+    };
+};
 
-	};
+/// Base USB Transfer implementation.
+class TransferImpl : public std::enable_shared_from_this<TransferImpl>
+{
+public:
+    /// Constructor
+    TransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
 
-	/// Base USB Transfer implementation.
-	class TransferImpl : public std::enable_shared_from_this<TransferImpl>
-	{
-	public:
+    /// Destructor
+    virtual ~TransferImpl();
 
-		/// Constructor
-		TransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
+    /// Set the transfer buffer.
+    void setBuffer(std::shared_ptr<unsigned char> pTransferBuffer);
 
-		/// Destructor
-		virtual ~TransferImpl();
+    /// Returns the transfer buffer
+    std::shared_ptr<unsigned char> getBuffer();
 
-		/// Set the transfer buffer.
-		void setBuffer(std::shared_ptr<unsigned char> pTransferBuffer);
+    /// Sets the data transfer size
+    void setDataTransferSize(size_t transferBytes);
 
-		/// Returns the transfer buffer
-		std::shared_ptr<unsigned char> getBuffer();
+    /// Returns the number of bytes transferred.
+    size_t bytesTransferred() const;
 
-		/// Sets the data transfer size
-		void setDataTransferSize(size_t transferBytes);
+    /// Initializes the pointer to the parent Transfer object
+    void init(std::weak_ptr<Transfer> pTransferParent);
 
-		/// Returns the number of bytes transferred.
-		size_t bytesTransferred()const;
+    /// Start the transfer
+    /// \todo Add timeout support.
+    virtual void Start();
 
-		/// Initializes the pointer to the parent Transfer object
-		void init(std::weak_ptr<Transfer> pTransferParent);
+    /// Start the transfer, with communication flags.
+    //		void Start(std::shared_ptr<std::atomic_flag> );
 
-		/// Start the transfer
-		/// \todo Add timeout support.
-		virtual void Start();
+    /// Cancel the transfer
+    virtual void Cancel();
 
-		/// Start the transfer, with communication flags.
-//		void Start(std::shared_ptr<std::atomic_flag> );
+    /// Resets the transfer for reuse
+    virtual void Reset();
 
-		/// Cancel the transfer
-		virtual void Cancel();
+    /// Returns TRUE if the transfer is in progress
+    bool isRunning() const;
 
-		/// Resets the transfer for reuse
-		virtual void Reset();
+    /// Returns TRUE if the transfer is complete
+    bool isComplete() const;
 
-		/// Returns TRUE if the transfer is in progress
-		bool isRunning()const;
+    /// Returns TRUE if completed successfully, throws pending exceptions
+    bool isSuccessful() const;
 
-		/// Returns TRUE if the transfer is complete
-		bool isComplete()const;
+    /// Returns the results of the transfer
+    TransferResult_t Result() const;
 
-		/// Returns TRUE if completed successfully, throws pending exceptions
-		bool isSuccessful()const;
+    /// Set timeout
+    void setTimeout(std::chrono::milliseconds timeout);
 
-		/// Returns the results of the transfer
-		TransferResult_t Result()const;
+protected:
+    /// Fill the transfer object
+    virtual void Setup() = 0;
 
-		/// Set timeout
-		void setTimeout(std::chrono::milliseconds timeout);
+    /// Create libusb transfer struct
+    void AllocTransfer(int iso_packets = 0);
 
-	protected:
+    /// Transfer Timeout
+    unsigned int m_Timeout;
 
-		/// Fill the transfer object
-		virtual void Setup() = 0;
+    /// Transfer buffer
+    std::shared_ptr<unsigned char> m_pTransferBuffer;
 
-		/// Create libusb transfer struct
-		void AllocTransfer(int iso_packets = 0);
+    /// Transfer buffer size
+    size_t m_transferSize;
 
-		/// Transfer Timeout
-		unsigned int m_Timeout;
+    /// LibUSB transfer struct
+    std::shared_ptr<libusb_transfer> m_pTransfer;
 
-		/// Transfer buffer
-		std::shared_ptr<unsigned char> m_pTransferBuffer;
+    /// Endpoint this transfer belongs to.
+    std::weak_ptr<EndpointImpl> m_pEndpointImpl;
 
-		/// Transfer buffer size
-		size_t m_transferSize;
-
-		/// LibUSB transfer struct
-		std::shared_ptr<libusb_transfer> m_pTransfer;
-
-		/// Endpoint this transfer belongs to.
-		std::weak_ptr<EndpointImpl> m_pEndpointImpl;
-
-		/// Libusb asynchronous transfer callback function
-		static void
+    /// Libusb asynchronous transfer callback function
+    static void
 #if defined(_WIN32)
-		__stdcall
+        __stdcall
 #endif
-		AsyncTransferCallback(libusb_transfer* pTransfer);
+        AsyncTransferCallback(libusb_transfer* pTransfer);
 
+    /// Notifies the device that the usb transfer is completed.
+    virtual void NotifyComplete();
 
-		/// Notifies the device that the usb transfer is completed.
-		virtual void NotifyComplete();
+    /// Throws pending exceptions
+    virtual void HandlePendingExceptions() const;
 
-		/// Throws pending exceptions
-		virtual void HandlePendingExceptions()const;
+private:
+    /// Weak pointers to all active transfer objects
+    static std::map<TransferImpl*, std::weak_ptr<TransferImpl>> m_TransferMap;
 
-	private:
+    /// Pointer to the Parent Transfer object
+    std::weak_ptr<Transfer> m_pParentTransfer;
 
+    /// Indicates that the transfer is complete
+    std::atomic<bool> m_Complete;
 
-		/// Weak pointers to all active transfer objects
-		static std::map<TransferImpl*, std::weak_ptr<TransferImpl>> m_TransferMap;
+    /// Synchronous completion flag.
+    int m_eventCompleted;
 
-		/// Pointer to the Parent Transfer object
-		std::weak_ptr<Transfer> m_pParentTransfer;
+    /// Indicates that the transfer has been submitted.
+    bool m_Submitted;
+};
 
-		/// Indicates that the transfer is complete
-		std::atomic<bool> m_Complete;
+// Control Transfer Implementation
+class ControlTransferImpl : public TransferImpl
+{
+public:
+    ControlTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
+    virtual ~ControlTransferImpl();
 
-		/// Synchronous completion flag.
-		int m_eventCompleted;
+    /// Control transfer setup information
+    virtual void SetupPacket(uint8_t Request, uint16_t wValue, uint16_t wIndex, DataTransferDirection_t transferDirection /* = HOST_TO_DEVICE */, RequestType_t requestType /*= REQ_VENDOR*/, RequestRecipient_t recipient /*= REC_ENDPOINT*/);
 
-		/// Indicates that the transfer has been submitted.
-		bool m_Submitted;
+    /// Resets the transfer object for reuse.
+    virtual void Reset();
 
+protected:
+    virtual void Setup();
 
+private:
+    uint8_t m_RequestType;
 
-	};
+    uint8_t m_RequestRecipient;
 
+    uint8_t m_DataTransferDirection;
 
+    uint8_t m_Request;
 
+    uint16_t m_wValue;
 
+    uint16_t m_wIndex;
 
-	// Control Transfer Implementation
-	class ControlTransferImpl : public TransferImpl
-	{
-	public:
+    /// Indicates that setup has been performed.
+    bool m_Setup;
+};
 
-		ControlTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
-		virtual ~ControlTransferImpl();
+// Isochronous Transfer Implementation
+class IsochronousTransferImpl : public TransferImpl
+{
+public:
+    IsochronousTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
+    virtual ~IsochronousTransferImpl();
 
-		/// Control transfer setup information
-		virtual void SetupPacket(uint8_t Request, uint16_t wValue, uint16_t wIndex, DataTransferDirection_t transferDirection /* = HOST_TO_DEVICE */, RequestType_t requestType /*= REQ_VENDOR*/, RequestRecipient_t recipient /*= REC_ENDPOINT*/ );
+    /// Resets the transfer object for reuse.
+    virtual void Reset();
 
-		/// Resets the transfer object for reuse.
-		virtual void Reset();
-	protected:
+    /// Sets the number of isochronous packets
+    virtual void setNumPackets(int numPackets);
 
-		virtual void Setup();
+protected:
+    virtual void Setup();
 
-	private:
+private:
+    int m_numPackets;
+};
 
-		uint8_t m_RequestType;
+// Interrupt Transfer Implementation
+class InterruptTransferImpl : public TransferImpl
+{
+public:
+    InterruptTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
+    virtual ~InterruptTransferImpl();
 
-		uint8_t m_RequestRecipient;
+    /// Resets the transfer object for reuse.
+    virtual void Reset();
 
-		uint8_t m_DataTransferDirection;
+protected:
+    virtual void Setup();
 
-		uint8_t m_Request;
+private:
+};
 
-		uint16_t m_wValue;
+// Bulk Transfer Implementation
+class BulkTransferImpl : public TransferImpl
+{
+public:
+    BulkTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
+    virtual ~BulkTransferImpl();
 
-		uint16_t m_wIndex;
+protected:
+    virtual void Setup();
 
-		/// Indicates that setup has been performed.
-		bool m_Setup;
+private:
+};
 
-	};
-
-	// Isochronous Transfer Implementation
-	class IsochronousTransferImpl : public TransferImpl
-	{
-	public:
-
-		IsochronousTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
-		virtual ~IsochronousTransferImpl();
-
-		/// Resets the transfer object for reuse.
-		virtual void Reset();
-
-		/// Sets the number of isochronous packets
-		virtual void setNumPackets(int numPackets);
-
-	protected:
-
-		virtual void Setup();
-
-	private:
-
-		int m_numPackets;
-	};
-
-	// Interrupt Transfer Implementation
-	class InterruptTransferImpl : public TransferImpl
-	{
-	public:
-
-		InterruptTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
-		virtual ~InterruptTransferImpl();
-
-		/// Resets the transfer object for reuse.
-		virtual void Reset();
-
-	protected:
-
-		virtual void Setup();
-
-	private:
-	};
-
-	// Bulk Transfer Implementation
-	class BulkTransferImpl : public TransferImpl
-	{
-	public:
-
-		BulkTransferImpl(std::weak_ptr<EndpointImpl> pEndpointImpl);
-		virtual ~BulkTransferImpl();
-
-	protected:
-
-		virtual void Setup();
-
-	private:
-	};
-
-}
+} // namespace LibUSB
 
 #endif // __LIBUSBPP_TRANSFER_IMPL_HPP

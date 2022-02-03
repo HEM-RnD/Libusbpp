@@ -24,26 +24,29 @@
 #include <exception>
 #include <stdexcept>
 
-
 namespace LibUSB
 {
 
-	class LibUSBException : public std::runtime_error
-	{
-	public:
-		LibUSBException(std::string text, int errorCode);
-		std::string translateError(int ErrorCode);
+class LibUSBException : public std::runtime_error
+{
+public:
+    LibUSBException(std::string text, int errorCode);
+    std::string translateError(int ErrorCode);
 
-		/// Returns the raw libusb error code.
-		int getLibusbErrorCode()const { return m_ErrorCode; };
+    /// Returns the raw libusb error code.
+    int getLibusbErrorCode() const
+    {
+        return m_ErrorCode;
+    };
 
-		virtual const char* what();
-	protected:
+    virtual const char* what();
 
-		int m_ErrorCode;
-	private:
-	};
+protected:
+    int m_ErrorCode;
 
-}
+private:
+};
+
+} // namespace LibUSB
 
 #endif // LIBUSBPP_EXCEPTION_HPP

@@ -30,9 +30,9 @@
  * the integer constant 1 before including stdlib.h.
  */
 #define __STDC_WANT_LIB_EXT1__ 1
-#include <stdlib.h>
-
 #include "Wideconvert.hpp"
+
+#include <stdlib.h>
 
 // FIXME: use the C++11
 // see: http://stackoverflow.com/a/18374698
@@ -40,68 +40,68 @@
 //      http://stackoverflow.com/q/24802133
 //      http://en.cppreference.com/w/cpp/header/codecvt
 
-std::wstring LibUSB::Util::StringToWString( const std::string& ns )
+std::wstring LibUSB::Util::StringToWString(const std::string& ns)
 {
 #if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
-	size_t bufferSize;
+    size_t bufferSize;
 
-	// first call to mbstowcs_s to get the target buffer size
-	mbstowcs_s(&bufferSize, NULL, 0, ns.c_str(), ns.size());
+    // first call to mbstowcs_s to get the target buffer size
+    mbstowcs_s(&bufferSize, NULL, 0, ns.c_str(), ns.size());
 
-	// create target buffer with required size
-	wchar_t* buffer = new wchar_t[bufferSize];
+    // create target buffer with required size
+    wchar_t* buffer = new wchar_t[bufferSize];
 
-	// second call to do the actual conversion
-	mbstowcs_s(&bufferSize, buffer, bufferSize, ns.c_str(), ns.size());
+    // second call to do the actual conversion
+    mbstowcs_s(&bufferSize, buffer, bufferSize, ns.c_str(), ns.size());
 
-	std::wstring result(buffer, bufferSize);
-	delete[] buffer;
-	return result;
+    std::wstring result(buffer, bufferSize);
+    delete[] buffer;
+    return result;
 #else
-	// first call to wcstombs to get the target buffer size
-	size_t bufferSize = mbstowcs (NULL, ns.c_str(), 0);
+    // first call to wcstombs to get the target buffer size
+    size_t bufferSize = mbstowcs(NULL, ns.c_str(), 0);
 
-	// create target buffer with required size
-	wchar_t* buffer = new wchar_t[bufferSize];
+    // create target buffer with required size
+    wchar_t* buffer = new wchar_t[bufferSize];
 
-	// second call to do the actual conversion
-	mbstowcs(buffer, ns.c_str(), bufferSize);
+    // second call to do the actual conversion
+    mbstowcs(buffer, ns.c_str(), bufferSize);
 
-	std::wstring result(buffer, bufferSize);
-	delete[] buffer;
-	return result;
+    std::wstring result(buffer, bufferSize);
+    delete[] buffer;
+    return result;
 #endif
 }
 
-std::string LibUSB::Util::WStringToString( const std::wstring& ws )
+std::string LibUSB::Util::WStringToString(const std::wstring& ws)
 {
 #if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
-	size_t bufferSize;
+    size_t bufferSize;
 
-	// first call to wcstombs_s to get the target buffer size
-	wcstombs_s(&bufferSize, NULL, 0, ws.c_str(), ws.size());
+    // first call to wcstombs_s to get the target buffer size
+    wcstombs_s(&bufferSize, NULL, 0, ws.c_str(), ws.size());
 
-	// create target buffer with required size
-	char* buffer = new char[bufferSize];
+    // create target buffer with required size
+    char* buffer = new char[bufferSize];
 
-	// second call to do the actual conversion
-	wcstombs_s(&bufferSize, buffer, bufferSize, ws.c_str(), ws.size());
+    // second call to do the actual conversion
+    wcstombs_s(&bufferSize, buffer, bufferSize, ws.c_str(), ws.size());
 
-	std::string result(buffer, bufferSize);
-	delete[] buffer;
-	return result;
+    std::string result(buffer, bufferSize);
+    delete[] buffer;
+    return result;
 #else
-	// first call to wcstombs to get the target buffer size
-	size_t bufferSize = wcstombs(NULL, ws.c_str(), 0);
+    // first call to wcstombs to get the target buffer size
+    size_t bufferSize = wcstombs(NULL, ws.c_str(), 0);
 
-	// create target buffer with required size
-	char* buffer = new char[bufferSize];
+    // create target buffer with required size
+    char* buffer = new char[bufferSize];
 
-	// second call to do the actual conversion
-	wcstombs(buffer, ws.c_str(), bufferSize);
+    // second call to do the actual conversion
+    wcstombs(buffer, ws.c_str(), bufferSize);
 
-	std::string result(buffer, bufferSize);
-	delete[] buffer;
-	return result;
+    std::string result(buffer, bufferSize);
+    delete[] buffer;
+    return result;
 #endif
 }

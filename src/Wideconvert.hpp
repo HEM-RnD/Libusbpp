@@ -23,18 +23,16 @@
 
 #include <string>
 
-
 namespace LibUSB
 {
 
-	namespace Util
-	{
-	// Prototype for conversion functions
-		std::wstring StringToWString(const std::string& s);
-		std::string WStringToString(const std::wstring& s);
+namespace Util
+{
+    // Prototype for conversion functions
+    std::wstring StringToWString(const std::string& s);
+    std::string WStringToString(const std::wstring& s);
 
-
-	}
-}
+} // namespace Util
+} // namespace LibUSB
 
 #endif // __LIBUSBPP_WIDECONVERT_HPP

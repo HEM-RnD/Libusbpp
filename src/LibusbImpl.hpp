@@ -21,34 +21,28 @@
 #ifndef __LIBUSBPP_LIBUSB_IMPL_HPP
 #define __LIBUSBPP_LIBUSB_IMPL_HPP
 
-#include <memory>
-#include <thread>
-#include <atomic>
-#include <condition_variable>
-
 #include <libusb.h>
 
+#include <atomic>
+#include <condition_variable>
+#include <memory>
+#include <thread>
 
 namespace LibUSB
 {
 
+class LibUSBImpl
+{
+public:
+    LibUSBImpl(bool debug = false);
+    ~LibUSBImpl();
 
-	class LibUSBImpl
-	{
-	public:
+    std::shared_ptr<libusb_context> m_pLibusb_context;
 
-		LibUSBImpl(bool debug = false);
-		~LibUSBImpl();
+protected:
+    const enum libusb_log_level m_LibUSBLogLevel;
+};
 
-		std::shared_ptr<libusb_context> m_pLibusb_context;
-
-
-	protected:
-
-		const enum libusb_log_level m_LibUSBLogLevel;
-
-	};
-
-}
+} // namespace LibUSB
 
 #endif // __LIBUSBPP_LIBUSB_IMPL_HPP

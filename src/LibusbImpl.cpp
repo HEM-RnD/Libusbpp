@@ -18,43 +18,39 @@
  * along with libusbpp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#include "LibusbImpl.hpp"
 
 #include <libusbpp/Exception.hpp>
 
-#include "LibusbImpl.hpp"
-
+#include <iostream>
 
 /// Used by shared_ptr to delete a libusb context
 class ContextDeleter
 {
 public:
-	void operator()(libusb_context* ctx) { libusb_exit(ctx); };
-
+    void operator()(libusb_context* ctx)
+    {
+        libusb_exit(ctx);
+    };
 };
 
-LibUSB::LibUSBImpl::LibUSBImpl( bool debugLibUSB /*=false*/ )
-    : m_LibUSBLogLevel ( debugLibUSB ? LIBUSB_LOG_LEVEL_DEBUG : LIBUSB_LOG_LEVEL_NONE )
+LibUSB::LibUSBImpl::LibUSBImpl(bool debugLibUSB /*=false*/)
+    : m_LibUSBLogLevel(debugLibUSB ? LIBUSB_LOG_LEVEL_DEBUG : LIBUSB_LOG_LEVEL_NONE)
 {
-	// Create the libusb context
-	libusb_context* pContext = nullptr;
-	int Result = libusb_init(&pContext);
-	if (Result != LIBUSB_SUCCESS)
-	{
-		throw std::runtime_error("LibUSB::LibUSBImpl::LibUSBImpl(): libusb_init() failed.");
-	}
+    // Create the libusb context
+    libusb_context* pContext = nullptr;
+    int Result = libusb_init(&pContext);
+    if (Result != LIBUSB_SUCCESS) {
+        throw std::runtime_error("LibUSB::LibUSBImpl::LibUSBImpl(): libusb_init() failed.");
+    }
 
-	// Set log message verbosity
-	libusb_set_debug(pContext, m_LibUSBLogLevel);
+    // Set log message verbosity
+    libusb_set_debug(pContext, m_LibUSBLogLevel);
 
-	// Store in a shared_ptr
-	m_pLibusb_context.reset(pContext, ContextDeleter());
-
-
+    // Store in a shared_ptr
+    m_pLibusb_context.reset(pContext, ContextDeleter());
 }
 
 LibUSB::LibUSBImpl::~LibUSBImpl()
 {
-
 }
-

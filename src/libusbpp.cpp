@@ -18,121 +18,101 @@
  * along with libusbpp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libusbpp.hpp>
-
 #include "DeviceImpl.hpp"
 #include "LibusbImpl.hpp"
 
+#include <libusbpp.hpp>
 
-std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t vendorID, uint16_t productID, DeviceFactory_t factory /*= nullptr*/ )
+std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice(uint16_t vendorID, uint16_t productID, DeviceFactory_t factory /*= nullptr*/)
 {
 
-	// Create a list of attached devices
-	libusb_device **device_list = nullptr;
+    // Create a list of attached devices
+    libusb_device** device_list = nullptr;
 
-	ssize_t NumResults = libusb_get_device_list(Impl_->m_pLibusb_context.get(), &device_list);
+    ssize_t NumResults = libusb_get_device_list(Impl_->m_pLibusb_context.get(), &device_list);
 
+    // Iterate each device.
+    std::list<std::shared_ptr<Device>> deviceList;
 
-	// Iterate each device.
-	std::list<std::shared_ptr<Device>> deviceList;
+    for (ssize_t i = 0; i < NumResults; i++) {
 
-	for (ssize_t i = 0; i < NumResults; i++)
-	{
+        // Create a device.
+        std::shared_ptr<Device> pDevice;
+        if (factory != nullptr) {
 
-		// Create a device.
-		std::shared_ptr<Device> pDevice;
-		if(factory != nullptr)
-		{
+            pDevice = factory(std::make_shared<DeviceImpl>(device_list[i]));
 
-			pDevice = factory(std::make_shared<DeviceImpl>(device_list[i]));
+        } else {
+            pDevice.reset(new Device(std::make_shared<DeviceImpl>(device_list[i])));
+        }
 
-		}
-		else
-		{
-			pDevice.reset(new Device(std::make_shared<DeviceImpl>(device_list[i])));
-		}
+        pDevice->Init();
 
-		pDevice->Init();
+        // Check the device
+        if ((pDevice->vendorID() == vendorID) && (pDevice->productID() == productID)) {
+            // Add device to the output list
+            deviceList.push_back(pDevice);
+        }
+    }
 
-		// Check the device
-		if ((pDevice->vendorID() == vendorID) && (pDevice->productID() == productID))
-		{
-			// Add device to the output list
-			deviceList.push_back(pDevice);
-		}
+    // Free the device list
+    libusb_free_device_list(device_list, 1);
 
-	}
-
-	// Free the device list
-	libusb_free_device_list(device_list, 1);
-
-	return deviceList;
-
+    return deviceList;
 }
 
-std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t vendorID, uint16_t productID, std::wstring serialStr, DeviceFactory_t factory /*= nullptr*/ )
+std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice(uint16_t vendorID, uint16_t productID, std::wstring serialStr, DeviceFactory_t factory /*= nullptr*/)
 {
 
-	// Get list of devices that match product/vendor id.
-	std::list<std::shared_ptr<Device>> DeviceList = FindDevice(vendorID, productID, factory);
+    // Get list of devices that match product/vendor id.
+    std::list<std::shared_ptr<Device>> DeviceList = FindDevice(vendorID, productID, factory);
 
-	std::list<std::shared_ptr<Device>> ResultList;
+    std::list<std::shared_ptr<Device>> ResultList;
 
-	// Open each device and locate a matching serial.
-	for( std::shared_ptr<Device> &pDevice : DeviceList )
-	{
-		if(pDevice->SerialString() == serialStr)
-		{
+    // Open each device and locate a matching serial.
+    for (std::shared_ptr<Device>& pDevice : DeviceList) {
+        if (pDevice->SerialString() == serialStr) {
 
-			ResultList.push_back(pDevice);
-			break;
-		}
-	}
+            ResultList.push_back(pDevice);
+            break;
+        }
+    }
 
-	return ResultList;
+    return ResultList;
 }
 
-std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindAllDevices( DeviceFactory_t factory /*= nullptr*/ )
+std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindAllDevices(DeviceFactory_t factory /*= nullptr*/)
 {
-	// Create a list of attached devices
-	libusb_device **device_list = nullptr;
+    // Create a list of attached devices
+    libusb_device** device_list = nullptr;
 
-	ssize_t NumResults = libusb_get_device_list(Impl_->m_pLibusb_context.get(), &device_list);
+    ssize_t NumResults = libusb_get_device_list(Impl_->m_pLibusb_context.get(), &device_list);
 
+    // Iterate each device.
+    std::list<std::shared_ptr<Device>> deviceList;
 
-	// Iterate each device.
-	std::list<std::shared_ptr<Device>> deviceList;
+    for (ssize_t i = 0; i < NumResults; i++) {
 
-	for (ssize_t i = 0; i < NumResults; i++)
-	{
+        // Create a device.
+        std::shared_ptr<Device> pDevice;
+        if (factory != nullptr) {
+            pDevice = factory(std::make_shared<DeviceImpl>(device_list[i]));
+        } else {
+            pDevice.reset(new Device(std::make_shared<DeviceImpl>(device_list[i])));
+        }
 
-		// Create a device.
-		std::shared_ptr<Device> pDevice;
-		if(factory != nullptr)
-		{
-			pDevice = factory(std::make_shared<DeviceImpl>(device_list[i]));
-		}
-		else
-		{
-			pDevice.reset(new Device(std::make_shared<DeviceImpl>(device_list[i])));
-		}
+        pDevice->Init();
 
-		pDevice->Init();
+        // Add device to the output list
+        deviceList.push_back(pDevice);
+    }
 
-		// Add device to the output list
-		deviceList.push_back(pDevice);
+    // Free the device list
+    libusb_free_device_list(device_list, 1);
 
-	}
-
-	// Free the device list
-	libusb_free_device_list(device_list, 1);
-
-	return deviceList;
-
+    return deviceList;
 }
-
 
 LibUSB::LibUSB::LibUSB(bool debug)
-   : Impl_(std::make_shared<LibUSBImpl>(debug))
+    : Impl_(std::make_shared<LibUSBImpl>(debug))
 { }
-
