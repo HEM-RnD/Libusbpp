@@ -28,6 +28,7 @@
 #include <libusb.h>
 
 #include <libusbpp/Device.hpp>
+#include "LibusbImpl.hpp"
 
 
 namespace LibUSB
@@ -98,6 +99,8 @@ namespace LibUSB
 		/// Returns endpoint 0
 		std::shared_ptr<Endpoint> getControlEndpoint();
 
+                std::weak_ptr<LibUSBImpl> getLibUSBImpl() const;
+
 	private:
 
 
@@ -117,6 +120,8 @@ namespace LibUSB
 		libusb_endpoint_descriptor m_EndpointZeroDescriptor;
 
 		std::shared_ptr<Endpoint> m_pEndpointZero;
+
+                std::weak_ptr<LibUSBImpl> m_libusbImpl;
 
 	};
 

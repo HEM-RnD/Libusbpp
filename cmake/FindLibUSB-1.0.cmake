@@ -27,6 +27,8 @@
 
 # use pkg-config to get the directories and then use these values
 # in the find_path() and find_library() calls
+
+
 find_package(PkgConfig QUIET)
 PKG_CHECK_MODULES(PC_LIBUSB1 QUIET libusb-1.0)
 set(LIBUSB1_DEFINITIONS ${PC_LIBUSB1_CFLAGS_OTHER})

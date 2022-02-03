@@ -40,10 +40,15 @@ namespace LibUSB
 	{
 
 	public:
+                explicit LibUSB(bool debug = false);
+
+                LibUSB(const LibUSB&) = delete;
+                LibUSB(LibUSB&&) = delete;
+                LibUSB operator=(const LibUSB&) = delete;
 
 		/// Function pointer to a LibUSB device object factory.
-		/// \todo Replace with std::function?
-		typedef std::shared_ptr<Device> (*DeviceFactory_t)(std::shared_ptr<DeviceImpl>);
+		using DeviceFactory_t = std::function<std::shared_ptr<Device>(std::shared_ptr<DeviceImpl>)>;
+
 
 		/*!
 		 * \brief
@@ -58,7 +63,7 @@ namespace LibUSB
 		 * \note
 		 * \warning Multiple devices can be returned via this method, if attached.
 		 */
-		static std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, bool debugLibUSB = false, DeviceFactory_t factory = nullptr);
+		std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, DeviceFactory_t factory = nullptr);
 
 		/*!
 		 * \brief
@@ -74,20 +79,15 @@ namespace LibUSB
 		 * \note
 		 * \warning Multiple devices can be returned via this method, if attached.
 		 */
-		static std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, std::wstring serialStr, bool debugLibUSB = false, DeviceFactory_t factory = nullptr);
+		std::list<std::shared_ptr<Device>> FindDevice(uint16_t vendorID, uint16_t productID, std::wstring serialStr, DeviceFactory_t factory = nullptr);
 
 		/// Returns all devices attached to the system.
-		static std::list<std::shared_ptr<Device>> FindAllDevices(bool debugLibUSB = false, DeviceFactory_t factory = nullptr);
+		std::list<std::shared_ptr<Device>> FindAllDevices(DeviceFactory_t factory = nullptr);
 
-	private:
-
+              private:
 		friend class TransferImpl;
 
-		static void Initialize(bool debug);
-
-
-		/// LibUSBImpl Singleton object
-		static std::shared_ptr<LibUSBImpl> Impl_;
+		std::shared_ptr<LibUSBImpl> Impl_;
 
 
 

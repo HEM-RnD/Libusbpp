@@ -58,5 +58,3 @@ LibUSB::LibUSBImpl::~LibUSBImpl()
 
 }
 
-
-std::shared_ptr<libusb_context> LibUSB::LibUSBImpl::m_pLibusb_context;

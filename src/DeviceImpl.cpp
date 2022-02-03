@@ -369,3 +369,7 @@ std::shared_ptr<LibUSB::Endpoint> LibUSB::DeviceImpl::getControlEndpoint()
 	return m_pEndpointZero;
 
 }
+
+std::weak_ptr<LibUSB::LibUSBImpl> LibUSB::DeviceImpl::getLibUSBImpl() const {
+  return m_libusbImpl;
+}

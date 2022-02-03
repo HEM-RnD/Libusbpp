@@ -151,8 +151,8 @@ void LibUSB::TransferImpl::Start()
 	while (!m_Complete && (CancelReason == 0))
 	{
 
-
-		int	Result = libusb_handle_events_completed(LibUSB::Impl_->m_pLibusb_context.get(), &m_eventCompleted );
+                auto context = m_pEndpointImpl.lock()->getDeviceImpl().lock()->getLibUSBImpl().lock()->m_pLibusb_context.get();
+		int	Result = libusb_handle_events_completed(context, &m_eventCompleted );
 
 
 
@@ -198,7 +198,7 @@ void LibUSB::TransferImpl::Start()
 			// Wait for completion.
 			while(!m_Complete)
 			{
-				if(libusb_handle_events_completed(LibUSB::Impl_->m_pLibusb_context.get(), &m_eventCompleted ) < 0)
+				if(libusb_handle_events_completed(context, &m_eventCompleted ) < 0)
 					break;
 			}
 			break;

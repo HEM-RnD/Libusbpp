@@ -40,7 +40,7 @@ namespace LibUSB
 		LibUSBImpl(bool debug = false);
 		~LibUSBImpl();
 
-		static std::shared_ptr<libusb_context> m_pLibusb_context;
+		std::shared_ptr<libusb_context> m_pLibusb_context;
 
 
 	protected:

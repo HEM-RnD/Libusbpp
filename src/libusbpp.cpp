@@ -24,11 +24,8 @@
 #include "LibusbImpl.hpp"
 
 
-std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t vendorID, uint16_t productID, bool debugLibUSB /*=false*/, DeviceFactory_t factory /*= nullptr*/ )
+std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t vendorID, uint16_t productID, DeviceFactory_t factory /*= nullptr*/ )
 {
-
-	// Ensure libusb is initialized.
-	Initialize(debugLibUSB);
 
 	// Create a list of attached devices
 	libusb_device **device_list = nullptr;
@@ -73,11 +70,11 @@ std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t 
 
 }
 
-std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t vendorID, uint16_t productID, std::wstring serialStr, bool debugLibUSB /*=false*/, DeviceFactory_t factory /*= nullptr*/ )
+std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t vendorID, uint16_t productID, std::wstring serialStr, DeviceFactory_t factory /*= nullptr*/ )
 {
 
 	// Get list of devices that match product/vendor id.
-	std::list<std::shared_ptr<Device>> DeviceList = FindDevice(vendorID, productID, debugLibUSB, factory);
+	std::list<std::shared_ptr<Device>> DeviceList = FindDevice(vendorID, productID, factory);
 
 	std::list<std::shared_ptr<Device>> ResultList;
 
@@ -95,12 +92,8 @@ std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindDevice( uint16_t 
 	return ResultList;
 }
 
-std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindAllDevices( bool debugLibUSB /*=false*/, DeviceFactory_t factory /*= nullptr*/ )
+std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindAllDevices( DeviceFactory_t factory /*= nullptr*/ )
 {
-
-	// Ensure libusb is initialized.
-	Initialize(debugLibUSB);
-
 	// Create a list of attached devices
 	libusb_device **device_list = nullptr;
 
@@ -138,13 +131,8 @@ std::list<std::shared_ptr<LibUSB::Device>> LibUSB::LibUSB::FindAllDevices( bool 
 
 }
 
-void LibUSB::LibUSB::Initialize( bool debug )
-{
-	// Ensure libusb is initialized.
-	if (Impl_.get() == nullptr)
-	{
-		Impl_.reset(new LibUSBImpl(debug));
-	}
-}
 
-std::shared_ptr<LibUSB::LibUSBImpl> LibUSB::LibUSB::Impl_;
+LibUSB::LibUSB::LibUSB(bool debug)
+   : Impl_(std::make_shared<LibUSBImpl>(debug))
+{ }
+

@@ -79,13 +79,13 @@ int main(int argc, char* argv[])
 
 		try
 		{
-
+                        LibUSB::LibUSB libusb;
 
 			std::wcout << L"Performing initial device test & transfer" << std::endl;
 
 			// ALWAYS start with find device! The overloads should allow you to quickly find/filter what you're looking for.
 			// The default factory will provide you with a newly-allocated (and initialized) LibUSB::Device object.
-			std::list<std::shared_ptr<LibUSB::Device>> deviceList = LibUSB::LibUSB::FindDevice(vendorID, productID);
+			std::list<std::shared_ptr<LibUSB::Device>> deviceList = libusb.FindDevice(vendorID, productID);
 
 			if (deviceList.empty())
 			{
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 */
 
 	{
-
+                LibUSB::LibUSB libusb;
 		// wait for user input.
 		testNames.push_back(L"Enumeration and descriptors");
 		std::wcout << L"Test 2 - Enumeration and descriptors" << std::endl << std::endl;
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
 		bool passed = true;
 
 		// Get a list of my devices (Works with any winusb/libusb0.sys/libusbK device)
-		std::list<std::shared_ptr<LibUSB::Device>> deviceList = LibUSB::LibUSB::FindDevice(vendorID, productID);
+		std::list<std::shared_ptr<LibUSB::Device>> deviceList = libusb.FindDevice(vendorID, productID);
 
 
 		// Open the device.
@@ -358,8 +358,10 @@ int main(int argc, char* argv[])
 
 		try
 		{
+                        LibUSB::LibUSB libusb;
+
 			std::wcout << L"Performing initial device test & transfer" << std::endl;
-			std::list<std::shared_ptr<LibUSB::Device>> deviceList = LibUSB::LibUSB::FindDevice(vendorID, productID);
+			std::list<std::shared_ptr<LibUSB::Device>> deviceList = libusb.FindDevice(vendorID, productID);
 
 			if (deviceList.empty())
 			{
@@ -440,10 +442,10 @@ int main(int argc, char* argv[])
 
 		try
 		{
-
+                        LibUSB::LibUSB libusb;
 			// Initialization
 			std::wcout << L"Initializing Device object and grabbing endpoints..." << std::endl;
-			std::list<std::shared_ptr<LibUSB::Device>> deviceList = LibUSB::LibUSB::FindDevice(vendorID, productID);
+			std::list<std::shared_ptr<LibUSB::Device>> deviceList = libusb.FindDevice(vendorID, productID);
 
 			if (deviceList.empty())
 			{
@@ -573,10 +575,11 @@ int main(int argc, char* argv[])
 
 		try
 		{
+                        LibUSB::LibUSB libusb;
 
 			// Initialization
 			std::wcout << L"Initializing Device object and grabbing endpoints..." << std::endl;
-			std::list<std::shared_ptr<LibUSB::Device>> deviceList = LibUSB::LibUSB::FindDevice(vendorID, productID);
+			std::list<std::shared_ptr<LibUSB::Device>> deviceList = libusb.FindDevice(vendorID, productID);
 
 			if (deviceList.empty())
 			{
@@ -716,10 +719,10 @@ int main(int argc, char* argv[])
 
 		try
 		{
-
+                        LibUSB::LibUSB libusb;
 			// Initialization
 			std::wcout << L"Initializing Device object and grabbing endpoints..." << std::endl;
-			std::list<std::shared_ptr<LibUSB::Device>> deviceList = LibUSB::LibUSB::FindDevice(vendorID, productID);
+			std::list<std::shared_ptr<LibUSB::Device>> deviceList = libusb.FindDevice(vendorID, productID);
 
 			if (deviceList.empty())
 			{

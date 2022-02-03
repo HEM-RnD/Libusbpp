@@ -79,3 +79,4 @@ CVS
 # Folders starting with underscore. #
 #####################################
 _*
+cmake-*
